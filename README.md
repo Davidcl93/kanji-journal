@@ -29,7 +29,12 @@ Interactive kanji learning app built with Streamlit.
 
 ## 📸 Preview
 
-![App Screenshot](./screenshot.jpeg)
+<details>
+<summary>Ver screenshot</summary>
+
+![App Screenshot](./screenshot.png)
+
+</details>
 
 ---
 
