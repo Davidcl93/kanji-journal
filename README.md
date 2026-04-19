@@ -32,7 +32,7 @@ Interactive kanji learning app built with Streamlit.
 <details>
 <summary>Ver screenshot</summary>
 
-![App Screenshot](./screenshot.png)
+![App Screenshot](./screenshot.jpeg)
 
 </details>
 
