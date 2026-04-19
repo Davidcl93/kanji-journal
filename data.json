@@ -1,3 +1,71 @@
 {
-  "known": []
+  "known": [
+    "一"
+  ],
+  "stats": {
+    "一": {
+      "correct": 25,
+      "wrong": 25
+    },
+    "二": {
+      "correct": 6,
+      "wrong": 5
+    },
+    "三": {
+      "correct": 1,
+      "wrong": 2
+    },
+    "四": {
+      "correct": 0,
+      "wrong": 2
+    },
+    "五": {
+      "correct": 2,
+      "wrong": 0
+    },
+    "大": {
+      "correct": 2,
+      "wrong": 0
+    },
+    "本": {
+      "correct": 4,
+      "wrong": 0
+    },
+    "上": {
+      "correct": 2,
+      "wrong": 0
+    },
+    "友": {
+      "correct": 0,
+      "wrong": 2
+    },
+    "気": {
+      "correct": 0,
+      "wrong": 2
+    },
+    "小": {
+      "correct": 2,
+      "wrong": 0
+    },
+    "円": {
+      "correct": 2,
+      "wrong": 0
+    },
+    "読": {
+      "correct": 2,
+      "wrong": 0
+    },
+    "中": {
+      "correct": 2,
+      "wrong": 0
+    },
+    "親": {
+      "correct": 2,
+      "wrong": 0
+    },
+    "飲": {
+      "correct": 2,
+      "wrong": 0
+    }
+  }
 }

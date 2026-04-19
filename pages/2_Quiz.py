@@ -1,99 +1,88 @@
 import streamlit as st
-import pandas as pd
 import random
-import sys
-import os
+from utils import load_kanji_data, load_data, save_data, register_answer, get_accuracy
 
-# 👇 para poder importar utils
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
-from utils import generate_options
-
-st.title("🧠 Quiz de Kanjis")
+st.title("🧠 Quiz")
 
 # 🧠 nivel
 level = st.session_state.get("level", "N5")
 
-# 📊 DATA (temporal, luego lo cambiamos por JSON)
-data = pd.DataFrame([
-    {"kanji": "日", "meaning": "sol / día", "reading": "にち / ひ", "level": "N5"},
-    {"kanji": "月", "meaning": "luna / mes", "reading": "げつ / つき", "level": "N5"},
-    {"kanji": "水", "meaning": "agua", "reading": "すい / みず", "level": "N5"},
-    {"kanji": "火", "meaning": "fuego", "reading": "か / ひ", "level": "N5"},
-])
-
-# 🎯 filtrar nivel
+# 📊 datos
+data = load_kanji_data()
 data = data[data["level"] == level]
 
-if len(data) == 0:
-    st.warning("No hay kanjis para este nivel")
-    st.stop()
+# 📥 progreso
+progress = load_data()
 
-# 🧠 estado
-if "quiz_index" not in st.session_state:
-    st.session_state.quiz_index = 0
+# 🧠 estado inicial
+if "current_kanji" not in st.session_state:
+    st.session_state.current_kanji = data.sample(1).iloc[0]
 
 if "quiz_options" not in st.session_state:
     st.session_state.quiz_options = []
 
-if "quiz_selected" not in st.session_state:
-    st.session_state.quiz_selected = None
+if "answered" not in st.session_state:
+    st.session_state.answered = False
 
-if "quiz_answered" not in st.session_state:
-    st.session_state.quiz_answered = False
+if "user_answer" not in st.session_state:
+    st.session_state.user_answer = None
 
-# 🧭 índice seguro
-st.session_state.quiz_index = st.session_state.quiz_index % len(data)
-kanji = data.iloc[st.session_state.quiz_index]
 
-# 🎯 generar opciones SOLO si no existen
+kanji = st.session_state.current_kanji
+
+# 🎯 generar opciones
 if not st.session_state.quiz_options:
-    st.session_state.quiz_options = generate_options(
-        kanji["meaning"], data
-    )
+    all_meanings = list(data["meaning"])
+    wrong = [m for m in all_meanings if m != kanji["meaning"]]
+    wrong = random.sample(wrong, min(3, len(wrong)))
 
-# 🀄 mostrar kanji
+    st.session_state.quiz_options = wrong + [kanji["meaning"]]
+    random.shuffle(st.session_state.quiz_options)
+
+# 🀄 kanji
 st.markdown(f"""
-<div style="
-    text-align:center;
-    font-size:70px;
-    margin-bottom:20px;
-">
+<div style="text-align:center; font-size:80px;">
     {kanji["kanji"]}
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("<div style='text-align:center;'>¿Qué significa?</div>", unsafe_allow_html=True)
 
-# 🔘 opciones
-for option in st.session_state.quiz_options:
-    if st.button(option, use_container_width=True):
-        if not st.session_state.quiz_answered:
-            st.session_state.quiz_selected = option
-            st.session_state.quiz_answered = True
+# 🎯 botones respuesta SOLO si no ha respondido
+if not st.session_state.answered:
+    for opt in st.session_state.quiz_options:
+        if st.button(opt, use_container_width=True):
+            st.session_state.user_answer = opt
+            st.session_state.answered = True
             st.rerun()
 
-# ✅ feedback
-if st.session_state.quiz_answered:
-    if st.session_state.quiz_selected == kanji["meaning"]:
-        st.success("✅ Correcto!")
+# 📊 si respondió
+if st.session_state.answered:
+    correct = st.session_state.user_answer == kanji["meaning"]
+
+    progress = register_answer(progress, kanji["kanji"], correct)
+    save_data(progress)
+
+    if correct:
+        st.success("✅ Correcto")
     else:
-        st.error(f"❌ Incorrecto. Era: {kanji['meaning']}")
+        st.error("❌ Incorrecto")
+        st.write("Respuesta correcta:", kanji["meaning"])
 
-    st.markdown(f"""
-    <div style="text-align:center; margin-top:10px;">
-        📖 {kanji["reading"]}
-    </div>
-    """, unsafe_allow_html=True)
+    st.write("On:", ", ".join(kanji["reading_on"]))
+    st.write("Kun:", ", ".join(kanji["reading_kun"]))
 
-    # 👉 botón siguiente
     if st.button("➡️ Siguiente"):
-        st.session_state.quiz_index += 1
+        st.session_state.current_kanji = data.sample(1).iloc[0]
         st.session_state.quiz_options = []
-        st.session_state.quiz_selected = None
-        st.session_state.quiz_answered = False
+        st.session_state.answered = False
+        st.session_state.user_answer = None
         st.rerun()
 
-# 📊 progreso simple
+
+# 📊 estadísticas globales
 st.divider()
-st.write(f"Pregunta {st.session_state.quiz_index + 1} / {len(data)}")
+
+acc = get_accuracy(progress)
+
+st.metric("📊 Precisión total", f"{acc*100:.1f}%")

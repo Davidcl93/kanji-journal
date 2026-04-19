@@ -1,24 +1,19 @@
 import streamlit as st
 import pandas as pd
-from utils import load_data, save_data
-
+import utils as utils
+import json
 st.title("📚 Aprender Kanjis")
 
 # 🧠 nivel seleccionado
 level = st.session_state.get("level", "N5")
 
-# 📊 DATA (temporal, luego lo cambiamos por JSON real)
-data = pd.DataFrame([
-    {"kanji": "日", "meaning": "sol / día", "reading": "にち / ひ", "level": "N5"},
-    {"kanji": "月", "meaning": "luna / mes", "reading": "げつ / つき", "level": "N5"},
-    {"kanji": "水", "meaning": "agua", "reading": "すい / みず", "level": "N5"},
-    {"kanji": "火", "meaning": "fuego", "reading": "か / ひ", "level": "N5"},
-])
+
+data = utils.load_kanji_data()
 
 # 🎯 filtrar por nivel
 data = data[data["level"] == level]
 
-progress = load_data()
+progress = utils.load_data()
 
 # 🧠 estado
 if "index" not in st.session_state:
@@ -41,7 +36,7 @@ if len(unlearned) == 0:
 
     if st.button("🔄 Reiniciar nivel"):
         progress["known"] = []
-        save_data(progress)
+        utils.save_data(progress)
         st.rerun()
 
     st.stop()
@@ -53,15 +48,18 @@ kanji = unlearned.iloc[st.session_state.index]
 # 🀄 card
 st.markdown(f"""
 <div style="
-    padding: 25px;
-    border-radius: 20px;
-    background-color: #ffffff;
-    color: #000000;
-    text-align: center;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
 ">
-    <h1 style="font-size:70px;">{kanji["kanji"]}</h1>
+    <div style="
+        font-size: 70px;
+        text-align: center;
+    ">
+        {kanji["kanji"]}
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -77,10 +75,16 @@ with col2:
 # 📖 resultado
 if st.session_state.show_answer:
     st.markdown(f"""
-    <div style="text-align:center; font-size:28px;">
-        <div>{kanji["reading"]}</div>
-        <div style="opacity:0.7;">{kanji["meaning"]}</div>
-    </div>
+    <div style="
+        text-align: center;
+        font-size: 22px;
+        margin-top: 10px;
+        line-height: 1.8;
+    ">
+    <b>On:</b> {", ".join(kanji["reading_on"])} <br>
+    <b>Kun:</b> {", ".join(kanji["reading_kun"])}<br>
+    <b>Significado:</b> {kanji["meaning"]}
+</div>
     """, unsafe_allow_html=True)
 
 # 🎮 acciones
@@ -93,7 +97,7 @@ with col2:
         if st.button("✔️ Aprendido", use_container_width=True):
             if kanji["kanji"] not in progress["known"]:
                 progress["known"].append(kanji["kanji"])
-                save_data(progress)
+                utils.save_data(progress)
 
             st.session_state.index += 1
             st.session_state.show_answer = False
