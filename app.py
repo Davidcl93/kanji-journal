@@ -12,4 +12,4 @@ st.session_state.level = level
 st.write(f"Nivel actual: {level}")
 
 if st.button("📚 Aprender"):
-    st.switch_page("pages/1_📚_Aprender.py")
+    st.switch_page("pages/1_Aprender.py")
