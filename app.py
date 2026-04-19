@@ -61,9 +61,10 @@ st.markdown(f"""
     background-color: #f7f7f9;
     text-align: center;
     margin-bottom: 10px;
+    color: black;
 ">
-    <h1 style="font-size:60px">{kanji["kanji"]}</h1>
-    <h3>{kanji["meaning"]}</h3>
+    <h1 style="font-size:60px; color:black;">{kanji["kanji"]}</h1>
+    <h3 style="color:black;">{kanji["meaning"]}</h3>
 </div>
 """, unsafe_allow_html=True)
 st.subheader(kanji["meaning"])
